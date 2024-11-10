@@ -437,7 +437,7 @@ coroutine.wrap(function()
 end)()
 
 coroutine.wrap(function()
-    while task.wait(0.3) do
+    while wait(0.3) do
         local rod = farm.findRod() 
             if rod then
                 if _G.autoreel then
