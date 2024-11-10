@@ -77,9 +77,9 @@ local tabGroups = {
 }
 
 local tabs = {
-    Main = tabGroups.TabGroup1:Tab({ Name = "Main", Image = "rbxassetid://18821914323" }),
-    Teleport = tabGroups.TabGroup1:Tab({ Name = "Teleport", Image = "rbxassetid://10734950309" }),
-    Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" })
+    Main = tabGroups.TabGroup1:Tab({ Name = "Main", Image = "rbxassetid://5012540643" }),
+    Teleport = tabGroups.TabGroup1:Tab({ Name = "Teleport", Image = "rbxassetid://5012543495" }),
+    Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://5012544386" })
 }
 
 local sections = {
@@ -128,8 +128,6 @@ sections.MainSection1:Slider({
         _G.shakeSpeed = value
     end
 })
-
-local RunService = game:GetService("RunService")
 
 _G.LoopCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
 
@@ -269,21 +267,28 @@ sections.Teleport2:Button({
 sections.Teleport3:Header({ Name = "Interact" })
 
 local teleportCoordinatesinter = {
-    ["mirror area"] = {x = -1627.71, y = -206.73, z = -2786.76},
-    ["terrapin angler"] = {x = -189.15, y = 135.84, z = 1966.55},
-    ["jack"] = {x = -176.71, y = 143.97, z = 1954.94},
-    ["terrapin shipwright"] = {x = -189.79, y = 132.50, z = 1923.65},
-    ["idle fishing NPC"] = {x = -68.00, y = 133.08, z = 2036.73},
-    ["idle fishing NPC1"] = {x = 69.58, y = 132.97, z = 2142.74},
-    ["clarence"] = {x = -1623.92, y = -231.07, z = -2900.14},
-    ["lnn keeper deep"] = {x = -1655.94, y = -214.18, z = -2830.74},
-    ["mel merchant"] = {x = -1658.86, y = -213.98, z = -2824.12},
-    ["sleeper"] = {x = -1500.79, y = -234.72, z = -2854.15}
+    ["basic diving gear"] = {x = 370.80, y = 134.50, z = 247.54},
+    ["bait crate"] = {x = 386.04, y = 136.99, z = 334.98},
+    ["fast rod"] = {x = 448.23, y = 150.50, z = 220.49},
+    ["lucky rod"] = {x = 445.53, y = 152.13, z = 221.35},
+    ["filmsy rod"] = {x = 471.27, y = 151.08, z = 230.08},
+    ["carbon rod"] = {x = 453.76, y = 153.49, z = 222.89},
+    ["plastic rod"] = {x = 452.91, y = 150.50, z = 230.62},
+    ["training rod"] = {x = 457.79, y = 150.50, z = 230.53},
+    ["gps"] = {x = 518.42, y = 151.83, z = 284.53},
+    ["long rod"] = {x = 482.74, y = 174.50, z = 148.02},
+    ["fish radar"] = {x = 367.70, y = 137.00, z = 274.97},
+    ["crab cage"] = {x = 476.74, y = 150.50, z = 232.48},
+    ["mod"] = {x = -29.87, y = -251.28, z = 199.37}
 }
 
-local selectedOptioninter = "mirror area"
+local selectedOptioninter = "fast rod"
 
-local optionTableinter = {"mirror area", "terrapin angler", "jack", "terrapin shipwright", "idle fishing NPC", "idle fishing NPC1", "clarence", "lnn keeper deep", "mel merchant", "sleeper"}
+local optionTableinter = {
+    "basic diving gear", "bait crate", "fast rod", "lucky rod", "filmsy rod",
+    "carbon rod", "plastic rod", "training rod", "gps", "long rod",
+    "fish radar", "crab cage", "mod"
+}
 
 sections.Teleport3:Dropdown({
     Name = "Selected NPCs",
@@ -361,51 +366,53 @@ function farm.shake()
         local safezone = shakeUI:FindFirstChild("safezone")
         local button = safezone and safezone:FindFirstChild("button")   
         if _G.buttonMiddle then
-                button.AnchorPoint = Vector2.new(0.5, 0.5)
-                button.Position = UDim2.new(0.5, 0, 0.5, 0)
-            end
-            if button.Visible then
-                local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
-                local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
-                VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 0)
-                VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 0)
+            button.AnchorPoint = Vector2.new(0.5, 0.5)
+            button.Position = UDim2.new(0.5, 0, 0.5, 0)
+        end
+        if button.Visible then
+            local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
+            local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
+            VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 0)
+            VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 0)
         end
     end
 end
 
 function farm.reel()
-    local reelUI = PlayerGui:FindFirstChild("reel")
-    if reelUI then
-        local reelBar = reelUI:FindFirstChild("bar")
-        if reelBar then
-            local reelClient = reelBar:FindFirstChild("reel")
-            if reelClient and reelClient.Disabled then
-                reelClient.Disabled = false
-            end
-            local updateColors = getsenv(reelClient).UpdateColors
-            if updateColors then
-                setupvalue(updateColors, 1, 100)
-                    ReplicatedStorage.events.reelfinished:FireServer(getupvalue(updateColors, 1), true)
-                    ReplicatedStorage.events.reelfinished:FireServer(getupvalue(updateColors, 1), true)
-                    ReplicatedStorage.events.reelfinished:FireServer(getupvalue(updateColors, 1), true)
-            end
+    local reel_ui = PlayerGui:FindFirstChild("reel")
+    if not reel_ui then return end
+    local reel_bar = reel_ui:FindFirstChild("bar")
+    if not reel_bar then return end
+    local reel_client = reel_bar:FindFirstChild("reel")
+    if not reel_client then return end
+    if reel_client.Disabled == true then
+        reel_client.Disabled = false
+    end
+    local update_colors = getsenv(reel_client).UpdateColors
+    if update_colors then
+        setupvalue(update_colors, 1, 100)
+        for i = 1, 10 do 
+            ReplicatedStorage.events.reelfinished:FireServer(getupvalue(update_colors, 1), true)
         end
     end
 end
 
 coroutine.wrap(function()
     while task.wait(_G.shakeSpeed) do
-        if _G.autocast then
-            task.spawn(farm.cast)
-        end
-        if _G.autoshake then
-            task.spawn(farm.shake)
-        end
-        if _G.autoreel then
-            task.spawn(farm.reel)
-        end
-        if _G.autoshakefast then
-            task.spawn(farm.shake)
+        local rod = farm.findRod() -- Check if player is holding a rod
+        if rod then
+            if _G.autocast then
+                task.spawn(farm.cast)
+            end
+            if _G.autoshake then
+                task.spawn(farm.shake)
+            end
+            if _G.autoreel then
+                task.spawn(farm.reel)
+            end
+            if _G.autoshakefast then
+                task.spawn(farm.shake)
+            end
         end
     end
 end)()
