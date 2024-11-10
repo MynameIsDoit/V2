@@ -391,7 +391,7 @@ function farm.reel()
     local update_colors = getsenv(reel_client).UpdateColors
     if update_colors then
         setupvalue(update_colors, 1, 100)
-        for i = 1, 10 do 
+        for i = 1, 5 do 
             ReplicatedStorage.events.reelfinished:FireServer(getupvalue(update_colors, 1), true)
         end
     end
