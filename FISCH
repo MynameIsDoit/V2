@@ -96,6 +96,7 @@ sections.MainSection1:Toggle({
     Name = "Auto Cast",
     Default = false,
     Callback = function(value)
+        _G.loopEnabled = value
         _G.autocast = value
     end,
 })
@@ -126,6 +127,21 @@ sections.MainSection1:Slider({
     Callback = function(value)
         _G.shakeSpeed = value
     end
+})
+
+local RunService = game:GetService("RunService")
+
+_G.LoopCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+
+sections.MainSection1:Button({
+    Name = "Set CFrame",
+    Callback = function()
+        _G.LoopCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+        Window:Notify({
+            Title = Window.Settings.Title,
+            Description = "CFrame position set to current location."
+        })
+    end,
 })
 
 sections.MainSection2:Header({ Name = "Misc" })
@@ -331,6 +347,14 @@ function farm.cast()
     end
 end
 
+RunService.RenderStepped:Connect(function()
+    if _G.loopEnabled then
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = _G.LoopCFrame
+        end
+    end
+end)
+
 function farm.shake()
     local shakeUI = PlayerGui:FindFirstChild("shakeui")
     if shakeUI then
@@ -361,10 +385,9 @@ function farm.reel()
             local updateColors = getsenv(reelClient).UpdateColors
             if updateColors then
                 setupvalue(updateColors, 1, 100)
-                local loopCount = _G.Instantcash and 5 or 1
-                for i = 1, loopCount do
                     ReplicatedStorage.events.reelfinished:FireServer(getupvalue(updateColors, 1), true)
-                end
+                    ReplicatedStorage.events.reelfinished:FireServer(getupvalue(updateColors, 1), true)
+                    ReplicatedStorage.events.reelfinished:FireServer(getupvalue(updateColors, 1), true)
             end
         end
     end
