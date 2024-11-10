@@ -361,15 +361,37 @@ RunService.RenderStepped:Connect(function()
 end)
 
 function farm.shake()
-    local shakeUI = PlayerGui:FindFirstChild("shakeui")
+    local player = game:GetService("Players").LocalPlayer
+    local shakeUI = player.PlayerGui:FindFirstChild("shakeui")
+    
     if shakeUI then
         local safezone = shakeUI:FindFirstChild("safezone")
-        local button = safezone and safezone:FindFirstChild("button")   
-        if _G.buttonMiddle then
+        local button = safezone and safezone:FindFirstChild("button")
+        local title = button and button:FindFirstChild("title")
+        local ripple = button and button:FindFirstChild("ripple")
+        local bar = player and player.PlayerGui:FindFirstChild("reel") and player.PlayerGui.reel:FindFirstChild("bar")
+
+        if bar then
+            bar.Visible = false
+        end
+        if button then
+            button.ImageTransparency = 1
+            button.BackgroundTransparency = 1
+
+            if title then
+                title.TextTransparency = 1  
+            end
+            
+            if ripple then
+                ripple.ImageTransparency = 1  
+            end
+        end
+        if _G.buttonMiddle and button then
             button.AnchorPoint = Vector2.new(0.5, 0.5)
             button.Position = UDim2.new(0.5, 0, 0.5, 0)
         end
-        if button.Visible then
+
+        if button and button.Visible then
             local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
             local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
             VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 0)
@@ -391,7 +413,7 @@ function farm.reel()
     local update_colors = getsenv(reel_client).UpdateColors
     if update_colors then
         setupvalue(update_colors, 1, 100)
-        for i = 1, 5 do 
+        for i = 1, 18 do 
             ReplicatedStorage.events.reelfinished:FireServer(getupvalue(update_colors, 1), true)
         end
     end
@@ -399,7 +421,7 @@ end
 
 coroutine.wrap(function()
     while task.wait(_G.shakeSpeed) do
-        local rod = farm.findRod() -- Check if player is holding a rod
+        local rod = farm.findRod() 
         if rod then
             if _G.autocast then
                 task.spawn(farm.cast)
@@ -407,11 +429,19 @@ coroutine.wrap(function()
             if _G.autoshake then
                 task.spawn(farm.shake)
             end
-            if _G.autoreel then
-                task.spawn(farm.reel)
-            end
             if _G.autoshakefast then
                 task.spawn(farm.shake)
+            end
+        end
+    end
+end)()
+
+coroutine.wrap(function()
+    while task.wait(0.3) do
+        local rod = farm.findRod() 
+            if rod then
+                if _G.autoreel then
+                task.spawn(farm.reel)
             end
         end
     end
