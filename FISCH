@@ -1,450 +1,301 @@
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local VirtualUser = game:GetService("VirtualUser")
-local StarterGui = game:GetService("StarterGui")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local validKeys = {
+    "NIGGERBLACKMUNGKORN",
+    "NIGERRRRR",
+    "black",
+    "soblackbytheway"
+}
 
-local existingUI = CoreGui:FindFirstChild("MacLib")
-if existingUI then
-    existingUI:Destroy()
+local function gethwid()
+    return tostring(game:GetService("RbxAnalyticsService"):GetClientId())
 end
 
-repeat wait() until game:IsLoaded()
-
-Players.LocalPlayer.Idled:Connect(function()
-    VirtualUser:ClickButton1(Vector2.new(9e9, 9e9))
-end)
-
-local MacLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/MynameIsDoit/UI/refs/heads/main/maclib.lua"))()
-
-local Window = MacLib:Window({
-    Title = "FISCH (DEMO)",
-    Subtitle = "by doit_only",
-    Size = UDim2.fromOffset(868, 650),
-    DragStyle = 1,
-    DisabledWindowControls = {},
-    ShowUserInfo = true,
-    Keybind = Enum.KeyCode.RightControl,
-    AcrylicBlur = true,
-})
-
-local globalSettings = {
-    UIBlurToggle = Window:GlobalSetting({
-        Name = "UI Blur",
-        Default = Window:GetAcrylicBlurState(),
-        Callback = function(enabled)
-            Window:SetAcrylicBlurState(enabled)
-            Window:Notify({
-                Title = Window.Settings.Title,
-                Description = (enabled and "Enabled" or "Disabled") .. " UI Blur",
-                Lifetime = 5
-            })
-        end,
-    }),
-    NotificationToggler = Window:GlobalSetting({
-        Name = "Notifications",
-        Default = Window:GetNotificationsState(),
-        Callback = function(enabled)
-            Window:SetNotificationsState(enabled)
-            Window:Notify({
-                Title = Window.Settings.Title,
-                Description = (enabled and "Enabled" or "Disabled") .. " Notifications",
-                Lifetime = 5
-            })
-        end,
-    }),
-    ShowUserInfo = Window:GlobalSetting({
-        Name = "Show User Info",
-        Default = Window:GetUserInfoState(),
-        Callback = function(enabled)
-            Window:SetUserInfoState(enabled)
-            Window:Notify({
-                Title = Window.Settings.Title,
-                Description = (enabled and "Showing" or "Redacted") .. " User Info",
-                Lifetime = 5
-            })
-        end,
-    })
-}
-
-local tabGroups = {
-    TabGroup1 = Window:TabGroup()
-}
-
-local tabs = {
-    Main = tabGroups.TabGroup1:Tab({ Name = "Main", Image = "rbxassetid://5012540643" }),
-    Teleport = tabGroups.TabGroup1:Tab({ Name = "Teleport", Image = "rbxassetid://5012543495" }),
-    Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://5012544386" })
-}
-
-local sections = {
-    MainSection1 = tabs.Main:Section({ Side = "Left" }),
-    MainSection2 = tabs.Main:Section({ Side = "Left" }),
-    Teleport1 = tabs.Teleport:Section({ Side = "Left" }),
-    Teleport2 = tabs.Teleport:Section({ Side = "Right" }),
-    Teleport3 = tabs.Teleport:Section({ Side = "Left" })
-}
-
-sections.MainSection1:Header({ Name = "Autofarm" })
-
-sections.MainSection1:Toggle({
-    Name = "Auto Cast",
-    Default = false,
-    Callback = function(value)
-        _G.loopEnabled = value
-        _G.autocast = value
-    end,
-})
-
-sections.MainSection1:Toggle({
-    Name = "Auto Shake",
-    Default = false,
-    Callback = function(value)
-        _G.autoshake = value
-    end,
-})
-
-sections.MainSection1:Toggle({
-    Name = "Auto Reel",
-    Default = false,
-    Callback = function(value)
-        _G.autoreel = value
-    end,
-})
-
-sections.MainSection1:Slider({
-    Name = "Shake Speed",
-    Default = 0.05,
-    Minimum = 0,
-    Maximum = 1,
-    DisplayMethod = "Number",
-    Precision = 2,
-    Callback = function(value)
-        _G.shakeSpeed = value
-    end
-})
-
-_G.LoopCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-
-sections.MainSection1:Button({
-    Name = "Set CFrame",
-    Callback = function()
-        _G.LoopCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-        Window:Notify({
-            Title = Window.Settings.Title,
-            Description = "CFrame position set to current location."
-        })
-    end,
-})
-
-sections.MainSection2:Header({ Name = "Misc" })
-
-sections.MainSection2:Toggle({
-    Name = "Instant Cash",
-    Default = false,
-    Callback = function(value)
-        _G.Instantcash = value
-    end,
-})
-
-sections.MainSection2:Toggle({
-    Name = "Center Button",
-    Default = false,
-    Callback = function(value)
-        _G.buttonMiddle = value
-    end,
-})
-
-sections.MainSection2:Toggle({
-    Name = "Shake Faster",
-    Default = false,
-    Callback = function(value)
-        _G.autoshakefast = value
-    end,
-})
-
-sections.MainSection2:Toggle({
-    Name = "Disable Chat",
-    Default = true,
-    Callback = function(value)
-        _G.disableChat = value
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, not value)
-    end,
-})
-
-sections.Teleport1:Header({ Name = "Island" })
-
-local teleportCoordinates = {
-    ["Reduce Lag (Die)"] = {x = 10, y = 0, z = 10},
-    ["Deep"] = {x = -1508.07, y = -234.71, z = -2855.81},
-    ["brine"] = {x = -1794.11, y = -142.87, z = -3302.78},
-    ["snow"] = {x = 2649.51, y = 142.28, z = 2521.12},
-    ["moosewood"] = {x = 383.10, y = 134.50, z = 243.94},
-    ["volcano"] = {x = -1888.52, y = 167.78, z = 329.24},
-    ["altar"] = {x = 1296.32, y = -805.29, z = -298.94},
-    ["vertigo"] = {x = -112.01, y = -515.30, z = 1040.33},
-    ["mushgrove"] = {x = 2501.47, y = 131.00, z = -720.73},
-    ["birch"] = {x = 1742.32, y = 141.50, z = -2502.24},
-    ["roslit"] = {x = -1476.53, y = 133.50, z = 671.69},
-    ["spike"] = {x = -1254.66, y = 137.66, z = 1554.43},
-    ["arch"] = {x = 998.96, y = 131.32, z = -1237.15},
-    ["foresaken"] = {x = -2498.25, y = 136.95, z = 1624.85},
-    ["trident"] = {x = -1479.55, y = -225.71, z = -2390.46},
-    ["sunstone"] = {x = -933.52, y = 131.14, z = -1115.44},
-    ["terrapin"] = {x = -145.92, y = 144.98, z = 1905.10},
-}
-
-local selectedOption = "Reduce Lag (Die)"
-
-local optionTable = {"Reduce Lag (Die)", "Deep", "brine", "snow", "moosewood", "volcano", "altar", "vertigo", "mushgrove", "birch", "roslit", "spike", "arch", "foresaken", "trident", "sunstone", "terrapin"}
-
-sections.Teleport1:Dropdown({
-    Name = "Selected Island",
-    Multi = false,
-    Required = true,
-    Options = optionTable,
-    Default = 1,
-    Callback = function(value)
-        selectedOption = value
-    end,
-})
-
-sections.Teleport1:Button({
-    Name = "Teleport Island",
-    Callback = function()
-        if selectedOption and teleportCoordinates[selectedOption] then
-            local coords = teleportCoordinates[selectedOption]
-            TeleportPlayerTo(coords.x, coords.y, coords.z)
-        end
-    end,
-})
-
-sections.Teleport2:Header({ Name = "NPCs" })
-
-local teleportCoordinatesNPC = {
-    ["mirror area"] = {x = -1627.71, y = -206.73, z = -2786.76},
-    ["terrapin angler"] = {x = -189.15, y = 135.84, z = 1966.55},
-    ["jack"] = {x = -176.71, y = 143.97, z = 1954.94},
-    ["terrapin shipwright"] = {x = -189.79, y = 132.50, z = 1923.65},
-    ["idle fishing NPC"] = {x = -68.00, y = 133.08, z = 2036.73},
-    ["idle fishing NPC1"] = {x = 69.58, y = 132.97, z = 2142.74},
-    ["clarence"] = {x = -1623.92, y = -231.07, z = -2900.14},
-    ["lnn keeper deep"] = {x = -1655.94, y = -214.18, z = -2830.74},
-    ["mel merchant"] = {x = -1658.86, y = -213.98, z = -2824.12},
-    ["sleeper"] = {x = -1500.79, y = -234.72, z = -2854.15}
-}
-
-local selectedOptionNPC = "mirror area"
-
-local optionTableNPC = {"mirror area", "terrapin angler", "jack", "terrapin shipwright", "idle fishing NPC", "idle fishing NPC1", "clarence", "lnn keeper deep", "mel merchant", "sleeper"}
-
-sections.Teleport2:Dropdown({
-    Name = "Selected NPCs",
-    Multi = false,
-    Required = true,
-    Options = optionTableNPC,
-    Default = 1,
-    Callback = function(value)
-        selectedOptionNPC = value
-    end
-})
-
-sections.Teleport2:Button({
-    Name = "Teleport NPCs",
-    Callback = function()
-        if selectedOptionNPC and teleportCoordinatesNPC[selectedOptionNPC] then
-            local coordsnpc = teleportCoordinatesNPC[selectedOptionNPC]
-            TeleportPlayerTo(coordsnpc.x, coordsnpc.y, coordsnpc.z)
-        end
-    end
-})
-
-sections.Teleport3:Header({ Name = "Interact" })
-
-local teleportCoordinatesinter = {
-    ["basic diving gear"] = {x = 370.80, y = 134.50, z = 247.54},
-    ["bait crate"] = {x = 386.04, y = 136.99, z = 334.98},
-    ["fast rod"] = {x = 448.23, y = 150.50, z = 220.49},
-    ["lucky rod"] = {x = 445.53, y = 152.13, z = 221.35},
-    ["filmsy rod"] = {x = 471.27, y = 151.08, z = 230.08},
-    ["carbon rod"] = {x = 453.76, y = 153.49, z = 222.89},
-    ["plastic rod"] = {x = 452.91, y = 150.50, z = 230.62},
-    ["training rod"] = {x = 457.79, y = 150.50, z = 230.53},
-    ["gps"] = {x = 518.42, y = 151.83, z = 284.53},
-    ["long rod"] = {x = 482.74, y = 174.50, z = 148.02},
-    ["fish radar"] = {x = 367.70, y = 137.00, z = 274.97},
-    ["crab cage"] = {x = 476.74, y = 150.50, z = 232.48},
-    ["mod"] = {x = -29.87, y = -251.28, z = 199.37}
-}
-
-local selectedOptioninter = "fast rod"
-
-local optionTableinter = {
-    "basic diving gear", "bait crate", "fast rod", "lucky rod", "filmsy rod",
-    "carbon rod", "plastic rod", "training rod", "gps", "long rod",
-    "fish radar", "crab cage", "mod"
-}
-
-sections.Teleport3:Dropdown({
-    Name = "Selected NPCs",
-    Multi = false,
-    Required = true,
-    Options = optionTableinter,
-    Default = 1,
-    Callback = function(value)
-        selectedOptioninter = value
-    end
-})
-
-sections.Teleport3:Button({
-    Name = "Teleport inter",
-    Callback = function()
-        if selectedOptioninter and teleportCoordinatesinter[selectedOptioninter] then
-            local coordsinter = teleportCoordinatesinter[selectedOptioninter]
-            TeleportPlayerTo(coordsinter.x, coordsinter.y, coordsinter.z)
-        end
-    end
-})
-
-function TeleportPlayerTo(x, y, z)
-    local player = game.Players.LocalPlayer
-    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(x , y , z)
+local function create_folder(folder_path)
+    if not isfolder(folder_path) then
+        makefolder(folder_path)
     end
 end
 
-local utility = {
-    blacklistedAttachments = {"bob", "bodyweld"}
-}
-
-function utility.removeInvalidAttachments(bobber)
-    for _, value in ipairs(bobber:GetDescendants()) do
-        if value:IsA("Attachment") and table.find(utility.blacklistedAttachments, value.Name) then
-            value:Destroy()
-        end
-    end
+local function save_data(folder_path, key, userId)
+    local file_path = folder_path .. "/" .. key .. ".txt"
+    writefile(file_path, "Key: " .. key .. "\nUserId: " .. userId .. "\nHWID: " .. gethwid())
 end
 
-local farm = {}
-
-function farm.findRod()
-    local character = LocalPlayer.Character
-    if not character then return nil end
-
-    for _, tool in ipairs(character:GetChildren()) do
-        if tool:IsA("Tool") and (tool.Name:find("rod") or tool.Name:find("Rod")) then
-            return tool
-        end
+local function load_data(folder_path, key)
+    local file_path = folder_path .. "/" .. key .. ".txt"
+    if isfile(file_path) then
+        local data = readfile(file_path)
+        local savedUserId = string.match(data, "UserId: (%d+)")
+        return savedUserId
     end
     return nil
 end
 
-function farm.cast()
-    local rod = farm.findRod()
-    if rod then
-		_G.autoreel = false
-        local args = { [1] = 100, [2] = 1 }
-        rod.events.cast:FireServer(unpack(args))
+local function isKeyValid(key)
+    for _, validKey in ipairs(validKeys) do
+        if key == validKey then
+            return true
+        end
     end
+    return false
 end
 
-RunService.RenderStepped:Connect(function()
-    if _G.loopEnabled then
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = _G.LoopCFrame
-        end
-    end
-end)
+local function handlePlayerAccess()
+    local userId = tostring(game:GetService("Players").LocalPlayer.UserId)
+    local savedUserId = load_data("KeyData", _G.KEY)
+    local hwid = gethwid()
 
-function farm.shake()
-    local player = game:GetService("Players").LocalPlayer
-    local shakeUI = player.PlayerGui:FindFirstChild("shakeui")
-    
-    if shakeUI then
-        local safezone = shakeUI:FindFirstChild("safezone")
-        local button = safezone and safezone:FindFirstChild("button")
-        local title = button and button:FindFirstChild("title")
-        local ripple = button and button:FindFirstChild("ripple")
-        local bar = player and player.PlayerGui:FindFirstChild("reel") and player.PlayerGui.reel:FindFirstChild("bar")
+    if savedUserId == nil then
+        _G.SAVED_USER_ID = userId
+        print("Key saved for user ID: " .. userId)
+        create_folder("KeyData")
+        save_data("KeyData", _G.KEY, userId)
+        game:GetService("Players").LocalPlayer:Kick("KEY SAVE. Please rejoin.")
+    elseif savedUserId == userId then
+    local Players = game:GetService("Players")
+    local Player = Players.LocalPlayer
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local PlayerGui = Player:WaitForChild("PlayerGui")
 
-        if bar then
-            bar.Visible = false
-        end
-        if button then
-            button.ImageTransparency = 1
-            button.BackgroundTransparency = 1
+    local Client = {}
 
-            if title then
-                title.TextTransparency = 1  
-            end
-            
-            if ripple then
-                ripple.ImageTransparency = 1  
+    Client.AntiAFK = function()
+        if Player and Player.Idled then
+            for _, connection in pairs(getconnections(Player.Idled)) do
+                connection:Disable()
             end
         end
-        if _G.buttonMiddle and button then
-            button.AnchorPoint = Vector2.new(0.5, 0.5)
-            button.Position = UDim2.new(0.5, 0, 0.5, 0)
-        end
-
-        if button and button.Visible then
-			_G.autoshake = true
-			_G.autoreel = false
-            local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
-            local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
-            VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 0)
-            VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 0)
-        end
     end
-end
 
-function farm.reel()
+    Client.AntiAFK()
 
-    local reel_ui = PlayerGui:FindFirstChild("reel")
-    if not reel_ui then return end
-    local reel_bar = reel_ui:FindFirstChild("bar")
-    if not reel_bar then return end
-    local reel_client = reel_bar:FindFirstChild("reel")
-    if not reel_client then return end
-    if reel_client.Disabled == true then
-        reel_client.Disabled = false
-    end
-    local update_colors = getsenv(reel_client).UpdateColors
-    if update_colors then
-		_G.autoshake = false
-        setupvalue(update_colors, 1, 100)
-        for i = 1, 20 do 
-            ReplicatedStorage.events.reelfinished:FireServer(getupvalue(update_colors, 1), true)
+    _Hawk = "ohhahtuhthttouttpwuttuaunbotwo"
+
+    local Hawk = loadstring(game:HttpGet("https://raw.githubusercontent.com/MynameIsDoit/HAWKLIB/refs/heads/main/main.lua", true))()
+
+    local Window = Hawk:Window({
+        ScriptName = "Doit HUB (FISCH)",
+        DestroyIfExists = true,
+        Theme = "Dark"
+    })
+
+    Window:Close({
+        visibility = true,
+        Callback = function()
+            Window:Destroy()
         end
-    end
-end
+    })
 
-coroutine.wrap(function()
-    while task.wait(_G.shakeSpeed) do
-        local rod = farm.findRod() 
-        if rod then
-            if _G.autocast then
-                task.spawn(farm.cast)
+    Window:Minimize({
+        visibility = true,
+        OpenButton = true,
+        Callback = function() end,
+    })
+
+    local tab1 = Window:Tab("Main")
+    local tab2 = Window:Tab("Setting")
+
+    local newsec = tab1:Section("Position")
+    newsec:UpdateSection("Position")
+
+    local cframeLabel = newsec:Label("Position", "No Position")
+
+    newsec:Button("Save Position", "Save your Position", function()
+        local character = Player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            _G.LoopCFrame = character.HumanoidRootPart.CFrame
+
+            local position = _G.LoopCFrame.Position
+            local roundedPosition = string.format("X: %d, Y: %d, Z: %d", position.X, position.Y, position.Z)
+
+            cframeLabel:UpdateLabel("Position", roundedPosition)
+        else
+            cframeLabel:UpdateLabel("Position", "HumanoidRootPart not found!")
+        end
+    end)
+
+    local newsec = tab1:Section("AutoFarm")
+    newsec:UpdateSection("AutoFarm")
+
+    newsec:Toggle("Auto Shake", false, function(Value)
+        _G.autoshake = Value
+    end)
+
+    newsec:Toggle("Auto Cast", false, function(Value)
+        _G.cast = Value
+        _G.loopteleport = Value
+    end)
+
+    newsec:Toggle("Auto Reel", false, function(Value)
+        _G.reel = Value
+    end)
+
+    local clickCount = 0
+    local cframeLabel = newsec:Label("Shake times", "Shakes: 0")
+
+    local function performClick(posX, posY)
+        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 0)
+        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 0)
+        clickCount = clickCount + 1
+        cframeLabel:UpdateLabel("Shake times", "Shakes: " .. tostring(clickCount))
+    end
+
+    local function resetClickCount()
+        clickCount = 0
+        cframeLabel:UpdateLabel("Shake times", "Shakes: 0")
+    end
+
+    local misc = tab2:Section("Misc")
+    misc:UpdateSection("Setting")
+
+    local slider = misc:Slider("Shake Speed",0,1,function(value)
+        ShakeSpeed = value
+    end)
+
+    misc:Toggle("Shake Faster", false, function(Value)
+        _G.shakefaster = Value
+    end)
+
+    misc:Toggle("Button Middle", false, function(Value)
+        _G.buttonMiddle = Value
+    end)
+
+    slider:SetValue(0.01)
+
+    spawn(function()
+        while task.wait(0.25) do
+            if _G.loopteleport then
+                local character = Player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") and _G.LoopCFrame then
+                    character.HumanoidRootPart.CFrame = _G.LoopCFrame
+                end
             end
+        end
+    end)
+
+    spawn(function()
+        while task.wait(ShakeSpeed) do
             if _G.autoshake then
-                task.spawn(farm.shake)
+                local shakeUI = PlayerGui:FindFirstChild("shakeui")
+                local safezone = shakeUI and shakeUI:FindFirstChild("safezone")
+                local button = safezone and safezone:FindFirstChild("button")
+                if button then
+                    if _G.buttonMiddle then
+                        button.AnchorPoint = Vector2.new(0.5, 0.5)
+                        button.Position = UDim2.new(0.5, 0, 0.5, 0)
+                    end
+                    if button.Visible then
+                        local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
+                        local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
+                        task.defer(function()
+                            performClick(posX, posY)
+                        end)
+                    end
+                end
             end
-            if _G.autoreel then
-                task.spawn(farm.reel()
+            if _G.shakefaster then
+                local shakeUI = PlayerGui:FindFirstChild("shakeui")
+                local safezone = shakeUI and shakeUI:FindFirstChild("safezone")
+                local button = safezone and safezone:FindFirstChild("button")
+                if button and button.Visible then
+                    local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
+                    local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
+                    task.defer(function()
+                        performClick(posX, posY)
+                        performClick(posX, posY)
+                    end)
+                end
             end
-            if _G.autoshakefast then
-                task.spawn(farm.shake)
+            local reelUI = PlayerGui:FindFirstChild("reel")
+            if reelUI then
+                local reelBar = reelUI:FindFirstChild("bar")
+                if reelBar and not reelBar.Visible then
+                    task.defer(resetClickCount)
+                end
+            end
+        end
+    end)
+
+    local utility = {
+        blacklistedAttachments = {"bob", "bodyweld"}
+    }
+
+    function utility.removeInvalidAttachments(bobber)
+        for _, value in ipairs(bobber:GetDescendants()) do
+            if value:IsA("Attachment") and table.find(utility.blacklistedAttachments, value.Name) then
+                value:Destroy()
             end
         end
     end
-end)()
 
-MacLib:SetFolder("Maclib")
-tabs.Settings:InsertConfigSection("Left")
-tabs.Main:Select()
-MacLib:LoadAutoLoadConfig()
+    local farm = {}
+
+    function farm.findRod()
+        local character = Player.Character
+        if not character then return nil end
+
+        for _, tool in ipairs(character:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:find("rod") or tool.Name:find("Rod")) then
+                return tool
+            end
+        end
+        return nil
+    end
+
+    spawn(function()
+        while task.wait() do
+            if _G.cast then
+                local rod = farm.findRod()
+                if rod and rod:FindFirstChild("events") and rod.events:FindFirstChild("cast") then
+                    local args = { [1] = 100, [2] = 1 }
+                    rod.events.cast:FireServer(unpack(args))
+                end
+            end
+        end
+    end)
+
+    local function fireReelFinished(update_colors, count)
+        if not update_colors then return end
+        
+        local value = getupvalue(update_colors, 1) 
+        for _ = 1, count do
+            ReplicatedStorage.events.reelfinished:FireServer(value, true)
+        end
+    end
+
+    spawn(function()
+        while task.wait() do
+            if _G.reel then
+                local reel_ui = PlayerGui:FindFirstChild("reel")
+                if reel_ui then
+                    local reel_bar = reel_ui:FindFirstChild("bar")
+                    if reel_bar then
+                        local reel_client = reel_bar:FindFirstChild("reel")
+                        if reel_client then
+                            if reel_client.Disabled then
+                                reel_client.Disabled = false
+                            end
+
+                            local update_colors = getsenv(reel_client).UpdateColors
+                            if update_colors then
+                                setupvalue(update_colors, 1, 100)
+                                fireReelFinished(update_colors, 1) 
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    else
+        game:GetService("Players").LocalPlayer:Kick("Incorrect USERID. You are not authorized to use this script.")
+    end
+end
+
+-- Check the key and handle access
+if isKeyValid(_G.KEY) then
+    handlePlayerAccess()
+else
+    game:GetService("Players").LocalPlayer:Kick("Invalid key. You are not authorized to use this script.")
+end
