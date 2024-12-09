@@ -1,212 +1,287 @@
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local LocalPlayer = Players.LocalPlayer
+local LocalCharacter = LocalPlayer.Character
+local HumanoidRootPart = LocalCharacter:FindFirstChild("HumanoidRootPart")
+local GuiService = game:GetService("GuiService")
 
-local validKeys = {
-    "NIGGERBLACKMUNGKORN",
-    "NIGERRRRR",
-    "black",
-    "soblackbytheway"
+local teleportSpots = {
+    Altar = CFrame.new(1296.320068359375, -808.5519409179688, -298.93817138671875),
+    Arch = CFrame.new(998.966796875, 126.6849365234375, -1237.1434326171875),
+    Birch = CFrame.new(1742.3203125, 138.25787353515625, -2502.23779296875),
+    Brine = CFrame.new(-1794.10596, -145.849701, -3302.92358, -5.16176224e-05, 3.10316682e-06, 0.99999994, 0.119907647, 0.992785037, 3.10316682e-06, -0.992785037, 0.119907647, -5.16176224e-05),
+    Deep = CFrame.new(-1510.88672, -237.695053, -2852.90674, 0.573604643, 0.000580655003, 0.81913209, -0.000340352941, 0.999999762, -0.000470530824, -0.819132209, -8.89541116e-06, 0.573604763),
+    DeepShop = CFrame.new(-979.196411, -247.910156, -2699.87207, 0.587748766, 0, 0.809043527, 0, 1, 0, -0.809043527, 0, 0.587748766),
+    Enchant = CFrame.new(1296.320068359375, -808.5519409179688, -298.93817138671875),
+    Executive = CFrame.new(-29.836761474609375, -250.48486328125, 199.11614990234375),
+    Keepers = CFrame.new(1296.320068359375, -808.5519409179688, -298.93817138671875),
+    ModHouse = CFrame.new(-30.205902099609375, -249.40594482421875, 204.0529022216797),
+    Moosewood = CFrame.new(383.10113525390625, 131.2406005859375, 243.93385314941406),
+    Mushgrove = CFrame.new(2501.48583984375, 127.7583236694336, -720.699462890625),
+    Roslit = CFrame.new(-1476.511474609375, 130.16842651367188, 671.685302734375),
+    Snow = CFrame.new(2648.67578125, 139.06605529785156, 2521.29736328125),
+    Snowcap = CFrame.new(2648.67578125, 139.06605529785156, 2521.29736328125),
+    Spike = CFrame.new(-1254.800537109375, 133.88555908203125, 1554.2021484375),
+    Statue = CFrame.new(72.8836669921875, 138.6964874267578, -1028.4193115234375),
+    Sunstone = CFrame.new(-933.259705, 128.143951, -1119.52063, -0.342042685, 0, -0.939684391, 0, 1, 0, 0.939684391, 0, -0.342042685),
+    Swamp = CFrame.new(2501.48583984375, 127.7583236694336, -720.699462890625),
+    Terrapin = CFrame.new(-143.875244140625, 141.1676025390625, 1909.6070556640625),
+    Trident = CFrame.new(-1479.48987, -228.710632, -2391.39307, 0.0435845852, 0, 0.999049723, 0, 1, 0, -0.999049723, 0, 0.0435845852),
+    Vertigo = CFrame.new(-112.007278, -492.901093, 1040.32788, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+    Volcano = CFrame.new(-1888.52319, 163.847565, 329.238281, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    Wilson = CFrame.new(2938.80591, 277.474762, 2567.13379, 0.4648332, 0, 0.885398269, 0, 1, 0, -0.885398269, 0, 0.4648332),
+    WilsonsRod = CFrame.new(2879.2085, 135.07663, 2723.64233, 0.970463336, -0.168695927, -0.172460333, 0.141582936, -0.180552125, 0.973321974, -0.195333466, -0.968990743, -0.151334763)
+}
+local FishAreas = {
+    ["Roslit Bay"] = CFrame.new(-1663.73889, 149.234116, 495.498016, 0.0380855016, 4.08820178e-08, -0.999274492, 5.74658472e-08, 1, 4.3101906e-08, 0.999274492, -5.90657123e-08, 0.0380855016),
+    ["Ocean"] = CFrame.new(7665.104, 125.444443, 2601.59351, 0.999966085, -0.000609769544, -0.00821684115, 0.000612694537, 0.999999762, 0.000353460142, 0.00821662322, -0.000358482561, 0.999966204),
+    ["Snowcap Pond"] = CFrame.new(2778.09009, 283.283783, 2580.323, 1, 7.17688531e-09, -2.22843701e-05, -7.17796267e-09, 1, -4.83369114e-08, 2.22843701e-05, 4.83370712e-08, 1),
+    ["Moosewood Docks"] = CFrame.new(343.2359924316406, 133.61595153808594, 267.0580139160156),
+    ["Deep Ocean"] = CFrame.new(3569.07153, 125.480949, 6697.12695, 0.999980748, -0.00188910461, -0.00591362361, 0.00193980196, 0.999961317, 0.00857902411, 0.00589718809, -0.00859032944, 0.9999457),
+    ["Vertigo"] = CFrame.new(-137.697098, -736.86377, 1233.15271, 1, -1.61821543e-08, -2.01375751e-05, 1.6184277e-08, 1, 1.05423091e-07, 2.01375751e-05, -1.0542341e-07, 1),
+    ["Snowcap Ocean"] = CFrame.new(3088.66699, 131.534332, 2587.11304, 1, 4.30694858e-09, -1.19097813e-14, -4.30694858e-09, 1, -2.80603398e-08, 1.17889275e-14, 2.80603398e-08, 1),
+    ["Harvesters Spike"] = CFrame.new(-1234.61523, 125.228767, 1748.57166, 0.999991536, -0.000663080777, -0.00405627443, 0.000725277001, 0.999881923, 0.0153511297, 0.00404561637, -0.0153539423, 0.999873936),
+    ["Sun Stone"] = CFrame.new(-845.903992, 133.172211, -1163.57776, 1, -7.93465915e-09, -2.09446498e-05, 7.93544608e-09, 1, 3.75741536e-08, 2.09446498e-05, -3.75743205e-08, 1),
+    ["Roslit Bay Ocean"] = CFrame.new(-1708.09302, 155.000015, 384.928009, 1, -9.84460868e-09, -3.24939563e-15, 9.84460868e-09, 1, 4.66220271e-08, 2.79042003e-15, -4.66220271e-08, 1),
+    ["Moosewood Pond"] = CFrame.new(509.735992, 152.000031, 302.173004, 1, -1.78487678e-08, -8.1329488e-14, 1.78487678e-08, 1, 8.45405168e-08, 7.98205428e-14, -8.45405168e-08, 1),
+    ["Terrapin Ocean"] = CFrame.new(58.6469994, 135.499985, 2147.41699, 1, 2.09643041e-08, -5.6023784e-15, -2.09643041e-08, 1, -9.92988376e-08, 3.52064755e-15, 9.92988376e-08, 1),
+    ["Isonade"] = CFrame.new(-1060.99902, 121.164787, 953.996033, 0.999958456, 0.000633197487, -0.00909138657, -0.000568434712, 0.999974489, 0.00712434994, 0.00909566507, -0.00711888634, 0.999933302),
+    ["Moosewood Ocean"] = CFrame.new(-167.642715, 125.19548, 248.009521, 0.999997199, -0.000432743778, -0.0023210498, 0.000467110571, 0.99988997, 0.0148265222, 0.00231437827, -0.0148275653, 0.999887407),
+    ["Roslit Pond"] = CFrame.new(-1811.96997, 148.047089, 592.642517, 1, 1.12983072e-08, -2.16573972e-05, -1.12998171e-08, 1, -6.97014357e-08, 2.16573972e-05, 6.97016844e-08, 1),
+    ["Moosewood Ocean Mythical"] = CFrame.new(252.802994, 135.849625, 36.8839989, 1, -1.98115071e-08, -4.50667564e-15, 1.98115071e-08, 1, 1.22230617e-07, 2.08510289e-15, -1.22230617e-07, 1),
+    ["Terrapin Olm"] = CFrame.new(22.0639992, 182.000015, 1944.36804, 1, 1.14953362e-08, -2.7011112e-15, -1.14953362e-08, 1, -7.09263972e-08, 1.88578841e-15, 7.09263972e-08, 1),
+    ["The Arch"] = CFrame.new(1283.30896, 130.923569, -1165.29602, 1, -5.89772364e-09, -3.3183043e-15, 5.89772364e-09, 1, 3.63913486e-08, 3.10367822e-15, -3.63913486e-08, 1),
+    ["Scallop Ocean"] = CFrame.new(23.2255898, 125.236847, 738.952271, 0.999990165, -0.00109633175, -0.00429760758, 0.00115595153, 0.999902785, 0.0138949333, 0.00428195624, -0.013899764, 0.999894202),
+    ["SunStone Hidden"] = CFrame.new(-1139.55701, 134.62204, -1076.94324, 1, 3.9719481e-09, -1.6278158e-05, -3.97231048e-09, 1, -2.22651142e-08, 1.6278158e-05, 2.22651781e-08, 1),
+    ["Mushgrove Stone"] = CFrame.new(2525.36011, 131.000015, -776.184021, 1, 1.90145943e-08, -3.24206519e-15, -1.90145943e-08, 1, -1.06596836e-07, 1.21516956e-15, 1.06596836e-07, 1),
+    ["Keepers Altar"] = CFrame.new(1307.13599, -805.292236, -161.363998, 1, 2.40881981e-10, -3.25609947e-15, -2.40881981e-10, 1, -1.35044154e-09, 3.255774e-15, 1.35044154e-09, 1),
+    ["Lava"] = CFrame.new(-1959.86206, 193.144821, 271.960999, 1, -6.02453598e-09, -2.97388313e-15, 6.02453598e-09, 1, 3.37767716e-08, 2.77039384e-15, -3.37767716e-08, 1),
+    ["Roslit Pond Seaweed"] = CFrame.new(-1785.2869873046875, 148.15780639648438, 639.9299926757812),    
 }
 
-local function gethwid()
-    return tostring(game:GetService("RbxAnalyticsService"):GetClientId())
-end
+local Client = {}
 
-local function create_folder(folder_path)
-    if not isfolder(folder_path) then
-        makefolder(folder_path)
-    end
-end
-
-local function save_data(folder_path, key, userId)
-    local file_path = folder_path .. "/" .. key .. ".txt"
-    writefile(file_path, "Key: " .. key .. "\nUserId: " .. userId .. "\nHWID: " .. gethwid())
-end
-
-local function load_data(folder_path, key)
-    local file_path = folder_path .. "/" .. key .. ".txt"
-    if isfile(file_path) then
-        local data = readfile(file_path)
-        local savedUserId = string.match(data, "UserId: (%d+)")
-        return savedUserId
-    end
-    return nil
-end
-
-local function isKeyValid(key)
-    for _, validKey in ipairs(validKeys) do
-        if key == validKey then
-            return true
+Client.AntiAFK = function()
+    if Player and Player.Idled then
+        for _, connection in pairs(getconnections(Player.Idled)) do
+            connection:Disable()
         end
     end
-    return false
 end
 
-local function handlePlayerAccess()
-    local userId = tostring(game:GetService("Players").LocalPlayer.UserId)
-    local savedUserId = load_data("KeyData", _G.KEY)
-    local hwid = gethwid()
+Client.AntiAFK()
 
-    if savedUserId == nil then
-        _G.SAVED_USER_ID = userId
-        print("Key saved for user ID: " .. userId)
-        create_folder("KeyData")
-        save_data("KeyData", _G.KEY, userId)
-        game:GetService("Players").LocalPlayer:Kick("KEY SAVE. Please rejoin.")
-    elseif savedUserId == userId then
-    local Players = game:GetService("Players")
-    local Player = Players.LocalPlayer
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local PlayerGui = Player:WaitForChild("PlayerGui")
+_Hawk = "ohhahtuhthttouttpwuttuaunbotwo"
 
-    local Client = {}
+local Hawk = loadstring(game:HttpGet("https://raw.githubusercontent.com/MynameIsDoit/HAWKLIB/refs/heads/main/main.lua", true))()
 
-    Client.AntiAFK = function()
-        if Player and Player.Idled then
-            for _, connection in pairs(getconnections(Player.Idled)) do
-                connection:Disable()
+local Window = Hawk:Window({
+    ScriptName = "Doit HUB (FISCH)",
+    DestroyIfExists = true,
+    Theme = "Dark"
+})
+
+Window:Close({
+    visibility = true,
+    Callback = function()
+        Window:Destroy()
+    end
+})
+
+Window:Minimize({
+    visibility = true,
+    OpenButton = true,
+    Callback = function() end,
+})
+
+local tab1 = Window:Tab("Main")
+local tab2 = Window:Tab("Teleport")
+local tab3 = Window:Tab("Setting")
+
+local newsec = tab1:Section("Position")
+newsec:UpdateSection("Position")
+
+local cframeLabel = newsec:Label("Current Position", "No Position")
+
+newsec:Button("Save Position", "Save your Position", function()
+    local character = Player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        _G.LoopCFrame = character.HumanoidRootPart.CFrame
+
+        local position = _G.LoopCFrame.Position
+        local roundedPosition = string.format("X: %d, Y: %d, Z: %d", position.X, position.Y, position.Z)
+
+        cframeLabel:UpdateLabel("Position", roundedPosition)
+    else
+        cframeLabel:UpdateLabel("Position", "HumanoidRootPart not found!")
+    end
+end)
+
+local newsec = tab1:Section("AutoFarm")
+newsec:UpdateSection("AutoFarm")
+
+newsec:Dropdown("Shake Mode", {"Mouse", "UI"}, function(selectedMode)
+    if selectedMode == "Mouse" then
+        _G.Shakemouse = true 
+        _G.ShakeGUI = false 
+    elseif selectedMode == "UI" then
+        _G.ShakeGUI = true 
+        _G.Shakemouse = false 
+    end
+end, "UI")
+
+newsec:Toggle("Auto Shake", false, function(Value)
+    _G.autoshake = Value
+end)
+
+newsec:Toggle("Auto Cast", false, function(Value)
+    _G.cast = Value
+    _G.loopteleport = Value
+end)
+
+newsec:Toggle("Auto Reel", false, function(Value)
+    _G.reel = Value
+end)
+
+local clickCount = 0
+local cframeLabel = newsec:Label("Shake times", "Shakes: 0")
+
+local function performClick(posX, posY)
+    VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 0)
+    VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 0)
+    clickCount = clickCount + 1
+    cframeLabel:UpdateLabel("Shake times", "Shakes: " .. tostring(clickCount))
+end
+
+local function resetClickCount()
+    clickCount = 0
+    cframeLabel:UpdateLabel("Shake times", "Shakes: 0")
+end
+
+
+local teleportz = tab2:Section("Teleport")
+teleportz:UpdateSection("Teleport")
+
+local teleportSpot = {}
+for key, _ in pairs(teleportSpots) do
+    table.insert(teleportSpot, key)
+end
+
+teleportz:Dropdown("Teleport Areas", teleportSpot, function(selected)
+    if teleportSpots and HumanoidRootPart then
+        local teleportCFrame = teleportSpots[selected]
+        if teleportCFrame then
+            HumanoidRootPart.CFrame = teleportCFrame
+        end
+    end
+end)
+
+local fishAreaKeys = {}
+for key, _ in pairs(FishAreas) do
+    table.insert(fishAreaKeys, key)
+end
+
+teleportz:Dropdown("Fish Areas", fishAreaKeys, function(selected)
+    if FishAreas and HumanoidRootPart then
+        local fishAreaCFrame = FishAreas[selected]
+        if fishAreaCFrame then
+            HumanoidRootPart.CFrame = fishAreaCFrame
+        end
+    end
+end)
+
+local misc = tab3:Section("Misc")
+misc:UpdateSection("Setting")
+
+local slider = misc:Slider("Shake Speed",0,1,function(value)
+    _G.ShakeSpeed = value
+end)
+
+misc:Toggle("Button Middle", false, function(Value)
+    _G.buttonMiddle = Value
+end)
+
+misc:Toggle("Anti AFK", true, function(Value)
+    _G.Antiafk = Value
+end)
+
+spawn(function()
+    while task.wait(0.01) do
+        if _G.Antiafk then
+            game:GetService("ReplicatedStorage"):WaitForChild("events"):WaitForChild("afk"):FireServer(false)
+        end
+    end
+end)  
+
+slider:SetValue(0)
+
+function GetKuyFB()
+    KuyYaimak = nil;
+    dd,ddd = pcal(function()
+        for _, v in pir(GetChildren(selff.Backpack)) do
+            if v and strfind(v.Name, "Rod") then
+                KuyYaimak = v;
+                return KuyYaimak;
+            end;
+        end;
+    end);
+    return KuyYaimak;
+end;
+
+function EquipeKuy()
+    InvKuyFB = GetKuyFB();
+    if InvKuyFB then
+        PSG.hud.safezone.backpack.events.equip:FireServer(InvKuyFB);
+    end;
+end;
+
+spawn(function()
+    while task.wait(0.1) do
+        if _G.loopteleport then
+            local character = Player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") and _G.LoopCFrame then
+                character.HumanoidRootPart.CFrame = _G.LoopCFrame
             end
         end
     end
+end)
 
-    Client.AntiAFK()
+spawn(function()
+    while task.wait(_G.ShakeSpeed) do
+        if _G.autoshake then
+            local shakeUI = PlayerGui:FindFirstChild("shakeui")
+            if shakeUI then
+                local safezone = shakeUI:FindFirstChild("safezone")
+                if safezone then
+                    local button = safezone:FindFirstChild("button")
+                    if button and button.Visible then
+                        if _G.buttonMiddle then
+                            button.AnchorPoint = Vector2.new(0.5, 0.5)
+                            button.Position = UDim2.new(0.5, 0, 0.5, 0)
+                        end
 
-    _Hawk = "ohhahtuhthttouttpwuttuaunbotwo"
+                        if _G.Shakemouse then
+                            local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
+                            local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
 
-    local Hawk = loadstring(game:HttpGet("https://raw.githubusercontent.com/MynameIsDoit/HAWKLIB/refs/heads/main/main.lua", true))()
-
-    local Window = Hawk:Window({
-        ScriptName = "Doit HUB (FISCH)",
-        DestroyIfExists = true,
-        Theme = "Dark"
-    })
-
-    Window:Close({
-        visibility = true,
-        Callback = function()
-            Window:Destroy()
-        end
-    })
-
-    Window:Minimize({
-        visibility = true,
-        OpenButton = true,
-        Callback = function() end,
-    })
-
-    local tab1 = Window:Tab("Main")
-    local tab2 = Window:Tab("Setting")
-
-    local newsec = tab1:Section("Position")
-    newsec:UpdateSection("Position")
-
-    local cframeLabel = newsec:Label("Position", "No Position")
-
-    newsec:Button("Save Position", "Save your Position", function()
-        local character = Player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            _G.LoopCFrame = character.HumanoidRootPart.CFrame
-
-            local position = _G.LoopCFrame.Position
-            local roundedPosition = string.format("X: %d, Y: %d, Z: %d", position.X, position.Y, position.Z)
-
-            cframeLabel:UpdateLabel("Position", roundedPosition)
-        else
-            cframeLabel:UpdateLabel("Position", "HumanoidRootPart not found!")
-        end
-    end)
-
-    local newsec = tab1:Section("AutoFarm")
-    newsec:UpdateSection("AutoFarm")
-
-    newsec:Toggle("Auto Shake", false, function(Value)
-        _G.autoshake = Value
-    end)
-
-    newsec:Toggle("Auto Cast", false, function(Value)
-        _G.cast = Value
-        _G.loopteleport = Value
-    end)
-
-    newsec:Toggle("Auto Reel", false, function(Value)
-        _G.reel = Value
-    end)
-
-    local clickCount = 0
-    local cframeLabel = newsec:Label("Shake times", "Shakes: 0")
-
-    local function performClick(posX, posY)
-        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 0)
-        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 0)
-        clickCount = clickCount + 1
-        cframeLabel:UpdateLabel("Shake times", "Shakes: " .. tostring(clickCount))
-    end
-
-    local function resetClickCount()
-        clickCount = 0
-        cframeLabel:UpdateLabel("Shake times", "Shakes: 0")
-    end
-
-    local misc = tab2:Section("Misc")
-    misc:UpdateSection("Setting")
-
-    local slider = misc:Slider("Shake Speed",0,1,function(value)
-        ShakeSpeed = value
-    end)
-
-    misc:Toggle("Shake Faster", false, function(Value)
-        _G.shakefaster = Value
-    end)
-
-    misc:Toggle("Button Middle", false, function(Value)
-        _G.buttonMiddle = Value
-    end)
-
-    slider:SetValue(0.01)
-
-    spawn(function()
-        while task.wait(0.25) do
-            if _G.loopteleport then
-                local character = Player.Character
-                if character and character:FindFirstChild("HumanoidRootPart") and _G.LoopCFrame then
-                    character.HumanoidRootPart.CFrame = _G.LoopCFrame
-                end
-            end
-        end
-    end)
-
-    spawn(function()
-        while task.wait(ShakeSpeed) do
-            if _G.autoshake then
-                local shakeUI = PlayerGui:FindFirstChild("shakeui")
-                local safezone = shakeUI and shakeUI:FindFirstChild("safezone")
-                local button = safezone and safezone:FindFirstChild("button")
-                if button then
-                    if _G.buttonMiddle then
-                        button.AnchorPoint = Vector2.new(0.5, 0.5)
-                        button.Position = UDim2.new(0.5, 0, 0.5, 0)
+                            task.defer(function()
+                                performClick(posX, posY)
+                                performClick(posX, posY)
+                            end)
+                        elseif _G.ShakeGUI then
+                            for i = 1, 3 do
+                                GuiService.SelectedObject = button
+                                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+                            end
+                        end
                     end
-                    if button.Visible then
-                        local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
-                        local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
-                        task.defer(function()
-                            performClick(posX, posY)
-                        end)
-                    end
                 end
             end
-            if _G.shakefaster then
-                local shakeUI = PlayerGui:FindFirstChild("shakeui")
-                local safezone = shakeUI and shakeUI:FindFirstChild("safezone")
-                local button = safezone and safezone:FindFirstChild("button")
-                if button and button.Visible then
-                    local posX = button.AbsolutePosition.X + button.AbsoluteSize.X / 2
-                    local posY = button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2
-                    task.defer(function()
-                        performClick(posX, posY)
-                        performClick(posX, posY)
-                    end)
-                end
-            end
+
             local reelUI = PlayerGui:FindFirstChild("reel")
             if reelUI then
                 local reelBar = reelUI:FindFirstChild("bar")
@@ -215,87 +290,76 @@ local function handlePlayerAccess()
                 end
             end
         end
-    end)
+    end
+end)
 
-    local utility = {
-        blacklistedAttachments = {"bob", "bodyweld"}
-    }
+local utility = {
+    blacklistedAttachments = {"bob", "bodyweld"}
+}
 
-    function utility.removeInvalidAttachments(bobber)
-        for _, value in ipairs(bobber:GetDescendants()) do
-            if value:IsA("Attachment") and table.find(utility.blacklistedAttachments, value.Name) then
-                value:Destroy()
+function utility.removeInvalidAttachments(bobber)
+    for _, value in ipairs(bobber:GetDescendants()) do
+        if value:IsA("Attachment") and table.find(utility.blacklistedAttachments, value.Name) then
+            value:Destroy()
+        end
+    end
+end
+
+local farm = {}
+
+function farm.findRod()
+    local character = Player.Character
+    if not character then return nil end
+
+    for _, tool in ipairs(character:GetChildren()) do
+        if tool:IsA("Tool") and (tool.Name:find("rod") or tool.Name:find("Rod")) then
+            return tool
+        end
+    end
+    return nil
+end
+
+spawn(function()
+    while task.wait() do
+        if _G.cast then
+            local rod = farm.findRod()
+            if rod and rod:FindFirstChild("events") and rod.events:FindFirstChild("cast") then
+                local args = { [1] = 100, [2] = 1 }
+                rod.events.cast:FireServer(unpack(args))
             end
         end
     end
+end)
 
-    local farm = {}
-
-    function farm.findRod()
-        local character = Player.Character
-        if not character then return nil end
-
-        for _, tool in ipairs(character:GetChildren()) do
-            if tool:IsA("Tool") and (tool.Name:find("rod") or tool.Name:find("Rod")) then
-                return tool
-            end
-        end
-        return nil
+local function fireReelFinished(update_colors, count)
+    if not update_colors then return end
+    local value = getupvalue(update_colors, 1) 
+    for _ = 1, count do
+        ReplicatedStorage.events.reelfinished:FireServer(value, true)
     end
+end
 
-    spawn(function()
-        while task.wait() do
-            if _G.cast then
-                local rod = farm.findRod()
-                if rod and rod:FindFirstChild("events") and rod.events:FindFirstChild("cast") then
-                    local args = { [1] = 100, [2] = 1 }
-                    rod.events.cast:FireServer(unpack(args))
-                end
-            end
-        end
-    end)
+spawn(function()
+    while task.wait() do
+        if _G.reel then
+            local reel_ui = PlayerGui:FindFirstChild("reel")
+            if reel_ui then
+                local reel_bar = reel_ui:FindFirstChild("bar")
+                if reel_bar then
+                    local reel_client = reel_bar:FindFirstChild("reel")
+                    if reel_client then
+                        if reel_client.Disabled then
+                            reel_client.Disabled = false
+                        end
 
-    local function fireReelFinished(update_colors, count)
-        if not update_colors then return end
-        
-        local value = getupvalue(update_colors, 1) 
-        for _ = 1, count do
-            ReplicatedStorage.events.reelfinished:FireServer(value, true)
-        end
-    end
-
-    spawn(function()
-        while task.wait() do
-            if _G.reel then
-                local reel_ui = PlayerGui:FindFirstChild("reel")
-                if reel_ui then
-                    local reel_bar = reel_ui:FindFirstChild("bar")
-                    if reel_bar then
-                        local reel_client = reel_bar:FindFirstChild("reel")
-                        if reel_client then
-                            if reel_client.Disabled then
-                                reel_client.Disabled = false
-                            end
-
-                            local update_colors = getsenv(reel_client).UpdateColors
-                            if update_colors then
-                                setupvalue(update_colors, 1, 100)
-                                fireReelFinished(update_colors, 1) 
-                            end
+                        local update_colors = getsenv(reel_client).UpdateColors
+                        if update_colors then
+                            setupvalue(update_colors, 1, 100)
+                            fireReelFinished(update_colors, 1) 
                         end
                     end
                 end
             end
         end
-    end)
-    else
-        game:GetService("Players").LocalPlayer:Kick("Incorrect USERID. You are not authorized to use this script.")
     end
-end
-
--- Check the key and handle access
-if isKeyValid(_G.KEY) then
-    handlePlayerAccess()
-else
-    game:GetService("Players").LocalPlayer:Kick("Invalid key. You are not authorized to use this script.")
-end
+end)
